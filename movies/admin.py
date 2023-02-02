@@ -1,7 +1,19 @@
+from ckeditor_uploader.widgets import CKEditorUploadingWidget
+from django import forms
 from django.contrib import admin
+
 from django.utils.safestring import mark_safe
 
 from .models import Category, Genre, Movie, MovieShots, Actor, Rating, RatingStar, Reviews
+
+
+class MovieAdminForm(forms.ModelForm):
+    '''Подключаем редактор'''
+    description = forms.CharField(label='Описание', widget=CKEditorUploadingWidget())
+
+    class Meta:
+        model = Movie
+        fields = '__all__'
 
 
 # admin.site.register(Category)
@@ -16,6 +28,7 @@ class ReviewInLine(admin.TabularInline):
     model = Reviews
     extra = 1  # одно пустое поле
     readonly_fields = ('name', 'email')
+
 
 class MovieShotsInline(admin.TabularInline):
     # кадры из фильма на странице фильма
@@ -40,6 +53,7 @@ class MovieAdmin(admin.ModelAdmin):
     save_on_top = True  # меню сохранения вверх
     save_as = True  # изменение кнопок меню
     list_editable = ('draft',)
+    form = MovieAdminForm
     readonly_fields = ("get_image",)
     '''групировка полей'''
     fieldsets = (
@@ -47,7 +61,7 @@ class MovieAdmin(admin.ModelAdmin):
             "fields": (("title", "tagline"),)
         }),
         (None, {
-             "fields": ("description", ("poster", "get_image"))
+            "fields": ("description", ("poster", "get_image"))
         }),
         (None, {
             "fields": (("year", "world_premiere", "country"),)
@@ -65,6 +79,7 @@ class MovieAdmin(admin.ModelAdmin):
     )
 
     '''вывод картинки постера'''
+
     def get_image(self, obj):
         return mark_safe(f'<img src={obj.poster.url} width="100" height="110"')
 
@@ -87,7 +102,7 @@ class GenreAdmin(admin.ModelAdmin):
 # admin.site.register(MovieShots)
 @admin.register(MovieShots)
 class MovieShotsAdmin(admin.ModelAdmin):
-    list_display = ("title", "movie" , "get_image")
+    list_display = ("title", "movie", "get_image")
     '''вывод изображений '''
     readonly_fields = ('get_image',)
 
